@@ -27,7 +27,7 @@ class ProductView(tk.Frame):
         self.toolbar_frame.pack(fill='x')
         self.product_list_frame.pack(fill='both', expand=1, pady='30 0', side='left')
 
-    def _toggle_details_frame(self, show):
+    def toggle_product_details(self, show):
         if show:
             self.product_details_frame.pack(fill='both', expand=1, side='left', pady='30 0', padx='10 0')
         else:

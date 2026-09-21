@@ -16,6 +16,7 @@ class ProductListFrame(tk.Frame):
         self.product_list.heading('name', text='Name')
         self.product_list.heading('price', text='Price')
         self.product_list.heading('stock', text='Stock')
+        self.product_list.bind('<<TreeviewSelect>>', self._on_list_selection_changed)
 
     def _layout_widgets(self):
         self.product_list.pack(fill='both', expand=1)
@@ -24,4 +25,8 @@ class ProductListFrame(tk.Frame):
         products = self.db.get_all_products()
         for item in products:
             self.product_list.insert('', 'end', iid=item[0], values=item[1:])
+
+    def _on_list_selection_changed(self, _):
+        if self.product_list.selection():
+            self.master.toggle_product_details(True)
                                       
