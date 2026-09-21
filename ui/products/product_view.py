@@ -3,7 +3,7 @@ from tkinter import messagebox
 from tkinter import ttk
 
 from .header_frame import HeaderFrame
-from .toolbrar_frame import ToolbarFrame
+from .toolbar_frame import ToolbarFrame
 from .product_list_frame import ProductListFrame
 from .product_details_frame import ProductDetailsFrame
 from .product_form_view import ProductFormView
