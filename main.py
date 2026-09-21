@@ -7,6 +7,7 @@ db = Database("shop.db")
 
 root = tk.Tk()
 root.title("Shop Manager")
+# root.state('zoomed')
 product_view = ProductView(root, db)
 product_view.pack(fill='both', expand=True, padx=10, pady=10)
 root.mainloop()
