@@ -6,4 +6,4 @@ class Product:
         self.stock = stock
 
     def __repr__(self):
-        return self.name
+        return f'Product [{self.name}] - {self.price}$'

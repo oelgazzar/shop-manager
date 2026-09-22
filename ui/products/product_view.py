@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import messagebox
-from tkinter import ttk
 
 from .header_frame import HeaderFrame
 from .toolbar_frame import ToolbarFrame
@@ -58,8 +57,7 @@ class ProductView(tk.Frame):
         if show:
             self.product_details_frame.pack(fill='both', expand=1, side='left', pady='30 0', padx='10 0')
         else:
-            return
-            # self.product_details_frame.pack_forget()
+            self.product_details_frame.pack_forget()
 
     def show_product_form_window(self, product=None):
         ProductFormView(self, db=self.db, save_handler=self._add_edit_products, product=product)

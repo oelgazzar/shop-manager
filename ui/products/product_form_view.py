@@ -1,8 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from models.product import Product
-
 class ProductFormView(tk.Toplevel):
     def __init__(self, master, db, save_handler, product=None, **cnf):
         super().__init__(master, **cnf)
