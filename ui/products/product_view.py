@@ -7,6 +7,7 @@ from .toolbar_frame import ToolbarFrame
 from .product_list_frame import ProductListFrame
 from .product_details_frame import ProductDetailsFrame
 from .product_form_view import ProductFormView
+from models.product import Product
 
 class ProductView(tk.Frame):
     def __init__(self, master, db):
@@ -43,10 +44,13 @@ class ProductView(tk.Frame):
 
     def update_product_details(self, product_id):
         if product_id is None:
+            self.product_details_frame.update(None)
             self.toggle_product_details_frame(False)
             return
         
         product = self.db.get_product(product_id)
+        if product is None:
+            return
         self.product_details_frame.update(product)
         self.toggle_product_details_frame(True)
 
@@ -54,14 +58,23 @@ class ProductView(tk.Frame):
         if show:
             self.product_details_frame.pack(fill='both', expand=1, side='left', pady='30 0', padx='10 0')
         else:
-            self.product_details_frame.pack_forget()
+            return
+            # self.product_details_frame.pack_forget()
 
     def show_product_form_window(self, product=None):
-        ProductFormView(self, db=self.db, on_save=self._refresh, product=product)
+        ProductFormView(self, db=self.db, save_handler=self._add_edit_products, product=product)
+
+    def _add_edit_products(self, product, values):
+        if product is None:
+            product = Product(None, *values)
+            self.db.create_product(product)
+        else:
+            (product.name, product.price, product.stock) = values
+            self.db.update_product(product)
+        self._refresh()
 
     def _refresh(self):
         self._update_product_list()
-        self.product_list_frame.scroll_to_end()
 
     def _delete_product(self, product):
         response = messagebox.askyesno(title="Confirm Delete Product", message=f"""Are you sure to delete this product
@@ -69,4 +82,5 @@ class ProductView(tk.Frame):
         if not response: return
 
         self.db.delete_product(product)
+        self.update_product_details(None)
         self._refresh()

@@ -1,24 +1,20 @@
 import sqlite3
+from pathlib import Path
 
 from models.product import Product
 
-schema = '''
-CREATE TABLE IF NOT EXISTS products(
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    price INTEGER NOT NULL,
-    stock INTEGER NOT NULL
-);
-'''
-
 class Database:
+    __schema_file_name__ = 'schema.sql'
+
     def __init__(self, path):
         self.connection = sqlite3.connect(path)
         self._init_schema()
 
     def _init_schema(self):
-        with self.connection as con:
-            con.executescript(schema)
+        schema_path = Path(__file__).parent / self.__schema_file_name__
+        with open(schema_path) as f:
+            with self.connection as con:
+                con.executescript(f.read())
 
     def get_all_products(self, name_filter=''):
         with self.connection as con:
@@ -28,7 +24,10 @@ class Database:
     def get_product(self, product_id):
             with self.connection as con:
                 res = con.execute('SELECT * FROM products WHERE id = ?', (product_id,))
-                return Product(*res.fetchone())
+                row = res.fetchone()
+                if row is None:
+                    return None
+                return Product(*row)
 
     def create_product(self, product):
         with self.connection as con:

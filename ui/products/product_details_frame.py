@@ -41,6 +41,12 @@ class ProductDetailsFrame(tk.LabelFrame):
 
     def update(self, product):
         self.product = product
+        if product is None:
+            self.name_value['text'] = ''
+            self.price_value['text'] = ''
+            self.stock_value['text'] = ''
+            return
+
         self.name_value['text'] = product.name
         self.price_value['text'] = product.price
         self.stock_value['text'] = product.stock

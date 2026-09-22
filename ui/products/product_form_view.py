@@ -1,14 +1,14 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 from models.product import Product
 
 class ProductFormView(tk.Toplevel):
-    def __init__(self, master, db, on_save, product=None, **cnf):
+    def __init__(self, master, db, save_handler, product=None, **cnf):
         super().__init__(master, **cnf)
 
         self.db = db
-        self.on_save = on_save
+        self.save_handler = save_handler
         self.product = product
 
         self.product_name_var = tk.StringVar(value=self.product.name if self.product else '')
@@ -17,6 +17,7 @@ class ProductFormView(tk.Toplevel):
 
         self.transient(master)
         self.grab_set()
+        self.focus_set()
         self.config(padx=10, pady=10)
 
         x = master.winfo_x() + (master.winfo_width() - self.winfo_width()) // 2
@@ -27,6 +28,7 @@ class ProductFormView(tk.Toplevel):
         self._layout_widgets()
 
         self.geometry(f"+{x}+{y}")
+        self.bind('<Escape>', lambda _: self.destroy())
 
     def _create_widgets(self):
         self.title_label = ttk.Label(self, text='New Product' if self.product is None else 'Update Product',
@@ -39,6 +41,10 @@ class ProductFormView(tk.Toplevel):
         self.stock_entry = ttk.Entry(self, textvariable=self.product_stock_var)
         self.save_button = ttk.Button(self, text='Save', command=self._on_save_clicked)
 
+        self.name_entry.bind('<Return>', lambda _: self.save_button.invoke())
+        self.price_entry.bind('<Return>', lambda _: self.save_button.invoke())
+        self.stock_entry.bind('<Return>', lambda _: self.save_button.invoke())
+
     def _layout_widgets(self):
         self.title_label.grid(row=0, columnspan=2, pady='0 10', sticky='we')
         self.name_label.grid(row=1, column=0, pady=10)
@@ -50,20 +56,50 @@ class ProductFormView(tk.Toplevel):
         self.save_button.grid(row=4, columnspan=2, pady=10)
 
     def _on_save_clicked(self):
-        self._save()
+        values = self._validate()
+
+        if values is None:
+            return
+        
+        self.save_handler(self.product, values)
         self.destroy()
-        self.on_save()
 
-    def _save(self):
-        name = self.product_name_var.get()
-        price = self.product_price_var.get()
-        stock = self.product_stock_var.get()
+    def _validate(self):
+        name = self.product_name_var.get().strip()
+        price_text = self.product_price_var.get()
+        stock_text = self.product_stock_var.get()
 
-        if self.product is None:
-            product = Product(id=None, name=name, price=price, stock=stock)
-            self.db.create_product(product)
-        else:
-            self.product.name = name
-            self.product.price = price
-            self.product.stock = stock
-            self.db.update_product(self.product)
+        if not name.strip():
+            messagebox.showerror('Invalid Name', 'Name is required.')
+            return
+
+        if not price_text.strip():
+            messagebox.showerror('Invalid Price', 'Price is required.')
+            return
+
+        if not stock_text.strip():
+            messagebox.showerror('Invalid Stock', 'Stock is required.')
+            return
+
+        try:
+            price = int(price_text)
+        except ValueError:
+            messagebox.showerror("Invalid Price", "Price must be an integer.")
+            return
+
+        if price < 0:
+            messagebox.showerror("Invalid Price", "Price cannot be negative.")
+            return
+
+        try:
+            stock = int(stock_text)
+        except ValueError:
+            messagebox.showerror("Invalid Stock", "Stock must be an integer.")
+            return
+
+        if stock < 0:
+            messagebox.showerror("Invalid Stock", "Stock cannot be negative.")
+            return
+
+        return (name, price, stock)
+        
